@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.device.dao.WashDeviceRecordDao">
+    
+	<sql id="washDeviceRecordColumns">
+		a.id AS "id",
+		a.device_id AS "washDevice.id",
+		a.wash_persion_id AS "washMember.id",
+		a.order_id AS "orderId",
+		a.msg AS "msg",
+		a.operator_time AS "operatorTime",
+		a.duration AS "duration",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		washDevice.name AS "washDevice.name",
+		washMember.mobile AS "washMember.mobile"
+	</sql>
+	
+	<sql id="washDeviceRecordJoins">
+		LEFT JOIN wash_device washDevice ON washDevice.id = a.device_id
+		LEFT JOIN wash_member washMember ON washMember.id = a.wash_persion_id
+	</sql>
+	
+    
+	<select id="get" resultType="WashDeviceRecord" >
+		SELECT 
+			<include refid="washDeviceRecordColumns"/>
+		FROM wash_device_record a
+		<include refid="washDeviceRecordJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashDeviceRecord" >
+		SELECT 
+			<include refid="washDeviceRecordColumns"/>
+		FROM wash_device_record a
+		<include refid="washDeviceRecordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="washDevice != null and washDevice.id != null and washDevice.id != ''">
+				AND a.device_id = #{washDevice.id}
+			</if>
+			<if test="washMember != null and washMember.id != null and washMember.id != ''">
+				AND a.wash_persion_id = #{washMember.id}
+			</if>
+			<if test="beginOperatorTime != null and endOperatorTime != null and beginOperatorTime != '' and endOperatorTime != ''">
+				AND a.operator_time BETWEEN #{beginOperatorTime} AND #{endOperatorTime}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashDeviceRecord" >
+		SELECT 
+			<include refid="washDeviceRecordColumns"/>
+		FROM wash_device_record a
+		<include refid="washDeviceRecordJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_device_record(
+			id,
+			device_id,
+			wash_persion_id,
+			order_id,
+			msg,
+			operator_time,
+			duration,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{washDevice.id},
+			#{washMember.id},
+			#{orderId},
+			#{msg},
+			#{operatorTime},
+			#{duration},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_device_record SET 	
+			device_id = #{washDevice.id},
+			wash_persion_id = #{washMember.id},
+			order_id = #{orderId},
+			msg = #{msg},
+			operator_time = #{operatorTime},
+			duration = #{duration},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_device_record
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_device_record SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashDeviceRecord" statementType="STATEMENT">
+		select * FROM wash_device_record  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBywashDevice" resultType="WashDevice">
+		SELECT 
+			*
+		FROM wash_device a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+				<if test="dbName == 'oracle'">#{name}||'%'</if>
+				<if test="dbName == 'mssql'">#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListBywashMember" resultType="WashMember">
+		SELECT 
+			*
+		FROM wash_member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+				<if test="dbName == 'oracle'">#{mobile}||'%'</if>
+				<if test="dbName == 'mssql'">#{mobile}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{mobile},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

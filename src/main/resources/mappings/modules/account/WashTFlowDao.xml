@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.account.dao.WashTFlowDao">
+    
+	<sql id="washTFlowColumns">
+		a.id AS "id",
+		a.t_sn AS "tsn",
+		a.t_datetime AS "tdatetime",
+		a.t_type AS "ttype",
+		a.member_id AS "member.id",
+		a.tpp_type AS "tppType",
+		a.comment AS "comment",
+		a.t_amount AS "tamount",
+		a.tpp_sn AS "tppSn",
+		a.tpp_result AS "tppResult",
+		member.mobile AS "member.mobile"
+	</sql>
+	
+	<sql id="washTFlowJoins">
+		LEFT JOIN wash_member member ON member.id = a.member_id
+	</sql>
+	
+    
+	<select id="get" resultType="WashTFlow" >
+		SELECT 
+			<include refid="washTFlowColumns"/>
+		FROM wash_t_flow a
+		<include refid="washTFlowJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashTFlow" >
+		SELECT 
+			<include refid="washTFlowColumns"/>
+		FROM wash_t_flow a
+		<include refid="washTFlowJoins"/>
+		<where>
+			
+			<if test="beginTDatetime != null and endTDatetime != null and beginTDatetime != '' and endTDatetime != ''">
+				AND a.t_datetime BETWEEN #{beginTDatetime} AND DATE_ADD(#{endTDatetime}, INTERVAL 1 DAY)
+			</if>
+			<if test="ttype != null and ttype != ''">
+				AND a.t_type = #{ttype}
+			</if>
+			<if test="member != null and member.id != null and member.id != ''">
+				AND a.member_id = #{member.id}
+			</if>
+			<if test="tppSn != null and tppSn != ''">
+				AND a.tpp_sn = #{tppSn}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY t_datetime DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashTFlow" >
+		SELECT 
+			<include refid="washTFlowColumns"/>
+		FROM wash_t_flow a
+		<include refid="washTFlowJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_t_flow(
+			id,
+			t_sn,
+			t_datetime,
+			t_type,
+			member_id,
+			tpp_type,
+			comment,
+			t_amount,
+			tpp_sn,
+			tpp_result
+		) VALUES (
+			#{id},
+			#{tsn},
+			#{tdatetime},
+			#{ttype},
+			#{member.id},
+			#{tppType},
+			#{comment},
+			#{tamount},
+			#{tppSn},
+			#{tppResult}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_t_flow SET 	
+			t_sn = #{tsn},
+			t_datetime = #{tdatetime},
+			t_type = #{ttype},
+			member_id = #{member.id},
+			tpp_type = #{tppType},
+			comment = #{comment},
+			t_amount = #{tamount},
+			tpp_sn = #{tppSn},
+			tpp_result = #{tppResult}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_t_flow
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_t_flow SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashTFlow" statementType="STATEMENT">
+		select * FROM wash_t_flow  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBymember" resultType="WashMember">
+		SELECT 
+			*
+		FROM wash_member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+				<if test="dbName == 'oracle'">#{mobile}||'%'</if>
+				<if test="dbName == 'mssql'">#{mobile}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{mobile},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

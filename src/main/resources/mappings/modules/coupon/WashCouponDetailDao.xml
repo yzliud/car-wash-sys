@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.coupon.dao.WashCouponDetailDao">
+    
+	<sql id="washCouponDetailColumns">
+		a.id AS "id",
+		a.coupon_id AS "couponId",
+		a.coupon_no AS "couponNo",
+		a.coupon_name AS "couponName",
+		a.flag AS "flag",
+		a.member_id AS "washMember.id",
+		a.total_amount AS "totalAmount",
+		a.discount_amount AS "discountAmount",
+		a.effective_time AS "effectiveTime",
+		a.failure_time AS "failureTime",
+		a.status AS "status",
+		a.order_no AS "orderNo",
+		a.remarks AS "remarks",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.del_flag AS "delFlag",
+		washMember.mobile AS "washMember.mobile"
+	</sql>
+	
+	<sql id="washCouponDetailJoins">
+		LEFT JOIN wash_member washMember ON washMember.id = a.member_id
+	</sql>
+	
+    
+	<select id="get" resultType="WashCouponDetail" >
+		SELECT 
+			<include refid="washCouponDetailColumns"/>
+		FROM wash_coupon_detail a
+		<include refid="washCouponDetailJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashCouponDetail" >
+		SELECT 
+			<include refid="washCouponDetailColumns"/>
+		FROM wash_coupon_detail a
+		<include refid="washCouponDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="couponNo != null and couponNo != ''">
+				AND a.coupon_no = #{couponNo}
+			</if>
+			<if test="couponName != null and couponName != ''">
+				AND a.coupon_name = #{couponName}
+			</if>
+			<if test="flag != null and flag != ''">
+				AND a.flag = #{flag}
+			</if>
+			<if test="washMember != null and washMember.id != null and washMember.id != ''">
+				AND a.member_id = #{washMember.id}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashCouponDetail" >
+		SELECT 
+			<include refid="washCouponDetailColumns"/>
+		FROM wash_coupon_detail a
+		<include refid="washCouponDetailJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_coupon_detail(
+			id,
+			coupon_id,
+			coupon_no,
+			coupon_name,
+			flag,
+			member_id,
+			total_amount,
+			discount_amount,
+			effective_time,
+			failure_time,
+			status,
+			order_no,
+			remarks,
+			create_date,
+			create_by,
+			update_date,
+			update_by,
+			del_flag
+		) VALUES (
+			#{id},
+			#{couponId},
+			#{couponNo},
+			#{couponName},
+			#{flag},
+			#{washMember.id},
+			#{totalAmount},
+			#{discountAmount},
+			#{effectiveTime},
+			#{failureTime},
+			#{status},
+			#{orderNo},
+			#{remarks},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_coupon_detail SET 	
+			coupon_id = #{couponId},
+			coupon_no = #{couponNo},
+			coupon_name = #{couponName},
+			flag = #{flag},
+			member_id = #{washMember.id},
+			total_amount = #{totalAmount},
+			discount_amount = #{discountAmount},
+			effective_time = #{effectiveTime},
+			failure_time = #{failureTime},
+			status = #{status},
+			order_no = #{orderNo},
+			remarks = #{remarks},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_coupon_detail
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_coupon_detail SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashCouponDetail" statementType="STATEMENT">
+		select * FROM wash_coupon_detail  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBywashMember" resultType="WashMember">
+		SELECT 
+			*
+		FROM wash_member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+				<if test="dbName == 'oracle'">#{mobile}||'%'</if>
+				<if test="dbName == 'mssql'">#{mobile}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{mobile},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

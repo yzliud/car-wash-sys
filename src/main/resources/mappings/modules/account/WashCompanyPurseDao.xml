@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.account.dao.WashCompanyPurseDao">
+    
+	<sql id="washCompanyPurseColumns">
+		a.id AS "id",
+		a.uid AS "member.id",
+		a.t_flow_no AS "tflowNo",
+		a.t_type AS "ttype",
+		a.t_datetime AS "tdatetime",
+		a.comment AS "comment",
+		a.income AS "income",
+		a.pay AS "pay",
+		a.balance AS "balance",
+		member.mobile AS "member.mobile"
+	</sql>
+	
+	<sql id="washCompanyPurseJoins">
+		LEFT JOIN wash_member member ON member.id = a.uid
+	</sql>
+	
+    
+	<select id="get" resultType="WashCompanyPurse" >
+		SELECT 
+			<include refid="washCompanyPurseColumns"/>
+		FROM wash_company_purse a
+		<include refid="washCompanyPurseJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashCompanyPurse" >
+		SELECT 
+			<include refid="washCompanyPurseColumns"/>
+		FROM wash_company_purse a
+		<include refid="washCompanyPurseJoins"/>
+		<where>
+			
+			<if test="member != null and member.id != null and member.id != ''">
+				AND a.uid = #{member.id}
+			</if>
+			<if test="tflowNo != null and tflowNo != ''">
+				AND a.t_flow_no = #{tflowNo}
+			</if>
+			<if test="ttype != null and ttype != ''">
+				AND a.t_type = #{ttype}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY t_datetime DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashCompanyPurse" >
+		SELECT 
+			<include refid="washCompanyPurseColumns"/>
+		FROM wash_company_purse a
+		<include refid="washCompanyPurseJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_company_purse(
+			id,
+			uid,
+			t_flow_no,
+			t_type,
+			t_datetime,
+			comment,
+			income,
+			pay,
+			balance
+		) VALUES (
+			#{id},
+			#{member.id},
+			#{tflowNo},
+			#{ttype},
+			#{tdatetime},
+			#{comment},
+			#{income},
+			#{pay},
+			#{balance}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_company_purse SET 	
+			uid = #{member.id},
+			t_flow_no = #{tflowNo},
+			t_type = #{ttype},
+			t_datetime = #{tdatetime},
+			comment = #{comment},
+			income = #{income},
+			pay = #{pay},
+			balance = #{balance}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_company_purse
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_company_purse SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashCompanyPurse" statementType="STATEMENT">
+		select * FROM wash_company_purse  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBymember" resultType="WashMember">
+		SELECT 
+			*
+		FROM wash_member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+				<if test="dbName == 'oracle'">#{mobile}||'%'</if>
+				<if test="dbName == 'mssql'">#{mobile}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{mobile},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

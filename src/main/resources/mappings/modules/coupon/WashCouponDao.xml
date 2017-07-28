@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.coupon.dao.WashCouponDao">
+    
+	<sql id="washCouponColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.flag AS "flag",
+		a.quantity AS "quantity",
+		a.total_amount AS "totalAmount",
+		a.discount_amount AS "discountAmount",
+		a.effective_time AS "effectiveTime",
+		a.failure_time AS "failureTime",
+		a.status AS "status",
+		a.remarks AS "remarks",
+		a.create_date AS "createDate",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.update_by AS "updateBy.id",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="washCouponJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="WashCoupon" >
+		SELECT 
+			<include refid="washCouponColumns"/>
+		FROM wash_coupon a
+		<include refid="washCouponJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashCoupon" >
+		SELECT 
+			<include refid="washCouponColumns"/>
+		FROM wash_coupon a
+		<include refid="washCouponJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+			<if test="flag != null and flag != ''">
+				AND a.flag = #{flag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashCoupon" >
+		SELECT 
+			<include refid="washCouponColumns"/>
+		FROM wash_coupon a
+		<include refid="washCouponJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_coupon(
+			id,
+			name,
+			flag,
+			quantity,
+			total_amount,
+			discount_amount,
+			effective_time,
+			failure_time,
+			status,
+			remarks,
+			create_date,
+			create_by,
+			update_date,
+			update_by,
+			del_flag
+		) VALUES (
+			#{id},
+			#{name},
+			#{flag},
+			#{quantity},
+			#{totalAmount},
+			#{discountAmount},
+			#{effectiveTime},
+			#{failureTime},
+			#{status},
+			#{remarks},
+			#{createDate},
+			#{createBy.id},
+			#{updateDate},
+			#{updateBy.id},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_coupon SET 	
+			name = #{name},
+			flag = #{flag},
+			quantity = #{quantity},
+			total_amount = #{totalAmount},
+			discount_amount = #{discountAmount},
+			effective_time = #{effectiveTime},
+			failure_time = #{failureTime},
+			status = #{status},
+			remarks = #{remarks},
+			update_date = #{updateDate},
+			update_by = #{updateBy.id}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_coupon
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_coupon SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashCoupon" statementType="STATEMENT">
+		select * FROM wash_coupon  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

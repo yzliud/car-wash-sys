@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.order.dao.WashOrdOrderDao">
+    
+	<sql id="washOrdOrderColumns">
+		a.id AS "id",
+		a.order_no AS "orderNo",
+		a.car_person_id AS "carPerson.id",
+		a.wash_person_id AS "washPerson.id",
+		a.device_id AS "washDevice.id",
+		a.device_mac AS "deviceMac",
+		a.mobile AS "mobile",
+		a.car_number AS "carNumber",
+		a.set_meal_id AS "setMealId",
+		a.total_fee AS "totalFee",
+		a.discount_fee AS "discountFee",
+		a.real_fee AS "realFee",
+		a.order_time AS "orderTime",
+		a.pay_time AS "payTime",
+		a.end_time AS "endTime",
+		a.order_status AS "orderStatus",
+		a.pay_mode AS "payMode",
+		a.pay_serial_number AS "paySerialNumber",
+		a.wash_fee AS "washFee",
+		a.remarks AS "remarks",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		carPerson.mobile AS "carPerson.mobile",
+		washPerson.mobile AS "washPerson.mobile",
+		washDevice.name AS "washDevice.name"
+	</sql>
+	
+	<sql id="washOrdOrderJoins">
+		LEFT JOIN wash_member carPerson ON carPerson.id = a.car_person_id
+		LEFT JOIN wash_member washPerson ON washPerson.id = a.wash_person_id
+		LEFT JOIN wash_device washDevice ON washDevice.id = a.device_id
+	</sql>
+	
+    
+	<select id="get" resultType="WashOrdOrder" >
+		SELECT 
+			<include refid="washOrdOrderColumns"/>
+		FROM wash_ord_order a
+		<include refid="washOrdOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashOrdOrder" >
+		SELECT 
+			<include refid="washOrdOrderColumns"/>
+		FROM wash_ord_order a
+		<include refid="washOrdOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="orderNo != null and orderNo != ''">
+				AND a.order_no = #{orderNo}
+			</if>
+			<if test="carPerson != null and carPerson.id != null and carPerson.id != ''">
+				AND a.car_person_id = #{carPerson.id}
+			</if>
+			<if test="washPerson != null and washPerson.id != null and washPerson.id != ''">
+				AND a.wash_person_id = #{washPerson.id}
+			</if>
+			<if test="washDevice != null and washDevice.id != null and washDevice.id != ''">
+				AND a.device_id = #{washDevice.id}
+			</if>
+			<if test="beginPayTime != null and endPayTime != null and beginPayTime != '' and endPayTime != ''">
+				AND a.pay_time BETWEEN #{beginPayTime} AND DATE_ADD(#{endPayTime}, INTERVAL 1 DAY)
+			</if>
+			<if test="orderStatus != null and orderStatus != ''">
+				AND a.order_status = #{orderStatus}
+			</if>
+			<if test="delFlag != null and delFlag != ''">
+				AND a.del_flag = #{delFlag}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashOrdOrder" >
+		SELECT 
+			<include refid="washOrdOrderColumns"/>
+		FROM wash_ord_order a
+		<include refid="washOrdOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_ord_order(
+			id,
+			order_no,
+			car_person_id,
+			wash_person_id,
+			device_id,
+			device_mac,
+			set_meal_id,
+			total_fee,
+			discount_fee,
+			real_fee,
+			order_time,
+			pay_time,
+			end_time,
+			order_status,
+			pay_mode,
+			pay_serial_number,
+			wash_fee,
+			remarks,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{orderNo},
+			#{carPerson.id},
+			#{washPerson.id},
+			#{washDevice.id},
+			#{deviceMac},
+			#{setMealId},
+			#{totalFee},
+			#{discountFee},
+			#{realFee},
+			#{orderTime},
+			#{payTime},
+			#{endTime},
+			#{orderStatus},
+			#{payMode},
+			#{paySerialNumber},
+			#{washFee},
+			#{remarks},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_ord_order SET 	
+			order_no = #{orderNo},
+			car_person_id = #{carPerson.id},
+			wash_person_id = #{washPerson.id},
+			device_id = #{washDevice.id},
+			device_mac = #{deviceMac},
+			set_meal_id = #{setMealId},
+			total_fee = #{totalFee},
+			discount_fee = #{discountFee},
+			real_fee = #{realFee},
+			order_time = #{orderTime},
+			pay_time = #{payTime},
+			end_time = #{endTime},
+			order_status = #{orderStatus},
+			pay_mode = #{payMode},
+			pay_serial_number = #{paySerialNumber},
+			wash_fee = #{washFee},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_ord_order
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_ord_order SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashOrdOrder" statementType="STATEMENT">
+		select * FROM wash_ord_order  where ${propertyName} = '${value}'
+	</select>
+	
+	<select id="findListBycarPerson" resultType="WashMember">
+		SELECT 
+			*
+		FROM wash_member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+				<if test="dbName == 'oracle'">#{mobile}||'%'</if>
+				<if test="dbName == 'mssql'">#{mobile}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{mobile},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListBywashPerson" resultType="WashMember">
+		SELECT 
+			*
+		FROM wash_member a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile LIKE 
+				<if test="dbName == 'oracle'">#{mobile}||'%'</if>
+				<if test="dbName == 'mssql'">#{mobile}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{mobile},'%')</if>
+			</if>
+			<if test="userType != null and userType != ''">
+				AND a.user_type = #{userType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	<select id="findListBywashDevice" resultType="WashDevice">
+		SELECT 
+			*
+		FROM wash_device a
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+				<if test="dbName == 'oracle'">#{name}||'%'</if>
+				<if test="dbName == 'mssql'">#{name}+'%'</if>
+				<if test="dbName == 'mysql'">concat(#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.device.dao.WashDeviceHeartDao">
+    
+	<sql id="washDeviceHeartColumns">
+		a.id AS "id",
+		a.mac AS "mac",
+		a.operator_time AS "operatorTime"
+	</sql>
+	
+	<sql id="washDeviceHeartJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="WashDeviceHeart" >
+		SELECT 
+			<include refid="washDeviceHeartColumns"/>
+		FROM wash_device_heart a
+		<include refid="washDeviceHeartJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashDeviceHeart" >
+		SELECT 
+			<include refid="washDeviceHeartColumns"/>
+		FROM wash_device_heart a
+		<include refid="washDeviceHeartJoins"/>
+		<where>
+			
+			<if test="mac != null and mac != ''">
+				AND a.mac = #{mac}
+			</if>
+			<if test="beginOperatorTime != null and endOperatorTime != null and beginOperatorTime != '' and endOperatorTime != ''">
+				AND a.operator_time BETWEEN #{beginOperatorTime} AND DATE_ADD(#{endOperatorTime}, INTERVAL 1 DAY)
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashDeviceHeart" >
+		SELECT 
+			<include refid="washDeviceHeartColumns"/>
+		FROM wash_device_heart a
+		<include refid="washDeviceHeartJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_device_heart(
+			id,
+			mac,
+			operator_time
+		) VALUES (
+			#{id},
+			#{mac},
+			#{operatorTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_device_heart SET 	
+			mac = #{mac},
+			operator_time = #{operatorTime}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_device_heart
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_device_heart SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashDeviceHeart" statementType="STATEMENT">
+		select * FROM wash_device_heart  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

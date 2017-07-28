@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.device.dao.WashDeviceFaultDao">
+    
+	<sql id="washDeviceFaultColumns">
+		a.id AS "id",
+		a.mac AS "mac",
+		a.device_name AS "deviceName",
+		a.device_address AS "deviceAddress",
+		a.status AS "status",
+		a.fault_time AS "faultTime",
+		a.fault_desc AS "faultDesc",
+		a.handle_time AS "handleTime",
+		a.remarks AS "remarks",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="washDeviceFaultJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="WashDeviceFault" >
+		SELECT 
+			<include refid="washDeviceFaultColumns"/>
+		FROM wash_device_fault a
+		<include refid="washDeviceFaultJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashDeviceFault" >
+		SELECT 
+			<include refid="washDeviceFaultColumns"/>
+		FROM wash_device_fault a
+		<include refid="washDeviceFaultJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="mac != null and mac != ''">
+				AND a.mac = #{mac}
+			</if>
+			<if test="deviceName != null and deviceName != ''">
+				AND a.device_name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{deviceName}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{deviceName}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{deviceName},'%')</if>
+			</if>
+			<if test="deviceAddress != null and deviceAddress != ''">
+				AND a.device_address LIKE 
+					<if test="dbName == 'oracle'">'%'||#{deviceAddress}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{deviceAddress}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{deviceAddress},'%')</if>
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashDeviceFault" >
+		SELECT 
+			<include refid="washDeviceFaultColumns"/>
+		FROM wash_device_fault a
+		<include refid="washDeviceFaultJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_device_fault(
+			id,
+			mac,
+			device_name,
+			device_address,
+			status,
+			fault_time,
+			fault_desc,
+			handle_time,
+			remarks,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{mac},
+			#{deviceName},
+			#{deviceAddress},
+			#{status},
+			#{faultTime},
+			#{faultDesc},
+			#{handleTime},
+			#{remarks},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_device_fault SET 	
+			mac = #{mac},
+			device_name = #{deviceName},
+			device_address = #{deviceAddress},
+			status = #{status},
+			fault_time = #{faultTime},
+			fault_desc = #{faultDesc},
+			handle_time = #{handleTime},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_device_fault
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_device_fault SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashDeviceFault" statementType="STATEMENT">
+		select * FROM wash_device_fault  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>

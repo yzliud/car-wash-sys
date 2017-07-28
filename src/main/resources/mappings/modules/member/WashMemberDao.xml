@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.member.dao.WashMemberDao">
+    
+	<sql id="washMemberColumns">
+		a.id AS "id",
+		a.open_id AS "openId",
+		a.nick_name AS "nickName",
+		a.mobile AS "mobile",
+		a.card_num AS "cardNum",
+		a.name AS "name",
+		a.status AS "status",
+		a.user_type AS "userType",
+		a.car_model AS "carModel",
+		a.car_number AS "carNumber",
+		a.sex AS "sex",
+		a.country AS "country",
+		a.province AS "province",
+		a.city AS "city",
+		a.img AS "img",
+		a.last_time AS "lastTime",
+		a.remarks AS "remarks",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="washMemberJoins">
+	</sql>
+	
+    
+	<select id="get" resultType="WashMember" >
+		SELECT 
+			<include refid="washMemberColumns"/>
+		FROM wash_member a
+		<include refid="washMemberJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="WashMember" >
+		SELECT 
+			<include refid="washMemberColumns"/>
+		FROM wash_member a
+		<include refid="washMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="nickName != null and nickName != ''">
+				AND a.nick_name = #{nickName}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND a.mobile = #{mobile}
+			</if>
+			<if test="status != null and status != ''">
+				AND a.status = #{status}
+			</if>
+			<if test="userType != null and userType != ''">
+				AND a.user_type = #{userType}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="WashMember" >
+		SELECT 
+			<include refid="washMemberColumns"/>
+		FROM wash_member a
+		<include refid="washMemberJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO wash_member(
+			id,
+			open_id,
+			nick_name,
+			mobile,
+			card_num,
+			name,
+			status,
+			user_type,
+			car_model,
+			car_number,
+			sex,
+			country,
+			province,
+			city,
+			img,
+			last_time,
+			remarks,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag
+		) VALUES (
+			#{id},
+			#{openId},
+			#{nickName},
+			#{mobile},
+			#{cardNum},
+			#{name},
+			#{status},
+			#{userType},
+			#{carModel},
+			#{carNumber},
+			#{sex},
+			#{country},
+			#{province},
+			#{city},
+			#{img},
+			#{lastTime},
+			#{remarks},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE wash_member SET 	
+			open_id = #{openId},
+			nick_name = #{nickName},
+			mobile = #{mobile},
+			card_num = #{cardNum},
+			name = #{name},
+			status = #{status},
+			user_type = #{userType},
+			car_model = #{carModel},
+			car_number = #{carNumber},
+			sex = #{sex},
+			country = #{country},
+			province = #{province},
+			city = #{city},
+			img = #{img},
+			last_time = #{lastTime},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM wash_member
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE wash_member SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="set">
+		UPDATE wash_member SET 
+			status = #{status},
+			user_type = #{userType},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="WashMember" statementType="STATEMENT">
+		select * FROM wash_member  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
